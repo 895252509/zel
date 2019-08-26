@@ -1,12 +1,12 @@
 class Zel{
   constructor(){
     this._dom = null;
-    this._input = null;
-    this._lineNum = null;
 
+    this._lineNum = null;
+    this._editArea = null;
   }
 
-  init( dom){
+  init( dom , file = null){
     if( dom instanceof HTMLElement ){
       this._dom = dom;
     }else if( typeof dom === 'string' ){
@@ -21,12 +21,13 @@ class Zel{
     
     this._bindevent();
     this._initLineNumber();
-  }
+    this._initEditarea();
 
-  onclick(e){
-    if( this._input === null){
-      this._input = new ZInputContext(this);
+    if( file === null){
+
     }
+
+    return this;
   }
 
   _bindevent(){
@@ -38,15 +39,15 @@ class Zel{
   }
 
   _initLineNumber(){
-    const lndom = support.getEmptyDiv();
-    this._lineNumdom = lndom;
-    const ls = lndom.style;
-    ls.width = '10px';
-    ls.height = '100%';
+    this._lineNum = new ZLineNumBar();
+    this._dom.appendChild(this._lineNum.dom);
+  }
 
-    lndom.style.borderRight = '1px solid red';
+  _initEditarea(){
+    this._editArea = new ZEditArea();
+    this._editArea.width = this._dom.clientWidth - this._lineNum._dom.offsetWidth;
 
-    this._dom.appendChild(lndom);
+    this._dom.appendChild(this._editArea.dom);
   }
 
   get _clientWidth(){
@@ -63,7 +64,7 @@ class Zel{
 
 class ZInputContext{
 
-  constructor( parent ){
+  constructor( ){
     this._dom = document.createElement("input");
     let istyle = this._dom.style;
     //istyle.display = 'none';
@@ -72,15 +73,90 @@ class ZInputContext{
     istyle.left = '0px';
     istyle.outlineStyle = 'none';
     istyle.border = 'none';
-
-    parent._dom.appendChild( this._dom );
+    istyle.backgroundColor = 'rgba(0,0,0,0)';
+    istyle.width = '100%';
   }
 
+  focus(){
+    this._dom.focus();
+  }
+
+  _bindevent(){
+    for( let en in document ){
+      if( en.startsWith("on") && this[en]){
+        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
+      }
+    }
+  }
+
+  get dom(){
+    return this._dom;
+  }
 }
 
-class ZLineNumeeBar{
+class ZLineNumBar{
   constructor(){
+    this._dom = support.getEmptyDiv();
     
+    const ls = this._dom.style;
+    ls.height = '100%';
+    ls.width = '20px';
+
+    ls.borderRight = '1px solid red';
+    ls.display = 'inline-block';
+  }
+
+  _bindevent(){
+    for( let en in document ){
+      if( en.startsWith("on") && this[en]){
+        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
+      }
+    }
+  }
+
+  get dom(){
+    return this._dom;
+  }
+}
+
+class ZEditArea{
+  constructor(){
+    this._dom = support.getEmptyDiv();
+    this._input = null;
+
+    const ls = this._dom.style;
+    ls.width = '100%';
+    ls.height = '100%';
+    
+    ls.display = 'inline-block';
+
+    this._bindevent();
+  }
+  
+  onclick(e){
+    if( this._input === null){
+      this._input = new ZInputContext();
+      this._dom.appendChild(this._input._dom);
+      this._input.focus();
+    }else{
+      this._input.focus();
+    }
+  }
+  
+  _bindevent(){
+    for( let en in document ){
+      if( en.startsWith("on") && this[en]){
+        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
+      }
+    }
+  }
+
+  set width(w){
+    this._dom.style.width = w;
+  }
+
+  get dom(){
+    return this._dom;
   }
 }
 

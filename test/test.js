@@ -1,6 +1,8 @@
 window.addEventListener("load",function (){
   const zel = new Zel() .init("div1");
 
+  console.log(zel);
+
   let file = null;
   let fr = new FileReader();
   document.getElementById("ifile").addEventListener("change", function(e){
