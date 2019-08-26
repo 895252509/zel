@@ -20,16 +20,14 @@ class Zel{
       isty.backgroundColor = '#9e9e9e';
     
     this._bindevent();
+    this._initLineNumber();
   }
 
   onclick(e){
     if( this._input === null){
       this._input = new ZInputContext(this);
     }
-
-
   }
-
 
   _bindevent(){
     for( let en in document ){
@@ -37,7 +35,18 @@ class Zel{
         this._dom.addEventListener( en.substr(2), this[en].bind(this) );
       }
     }
+  }
 
+  _initLineNumber(){
+    const lndom = support.getEmptyDiv();
+    this._lineNumdom = lndom;
+    const ls = lndom.style;
+    ls.width = '10px';
+    ls.height = '100%';
+
+    lndom.style.borderRight = '1px solid red';
+
+    this._dom.appendChild(lndom);
   }
 
   get _clientWidth(){
@@ -67,6 +76,24 @@ class ZInputContext{
     parent._dom.appendChild( this._dom );
   }
 
+}
+
+class ZLineNumeeBar{
+  constructor(){
+    
+  }
+}
+
+class support{
+  static getEmptyDiv(){
+    let dom = document.createElement("div");
+    dom.style.border = 'none';
+    dom.style.margin = '0px';
+    dom.style.padding = '0px';
+    dom.style.backgroundColor = 'rgba(0,0,0,0)';
+
+    return dom;
+  }
 
 
 }
