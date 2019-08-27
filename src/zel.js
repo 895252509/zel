@@ -54,27 +54,53 @@ class Part extends Eventable{
   constructor(){
     super();
 
+    this._dom = null;
+
+    this._bindEventToDom();
   }
 
-  onload(){
-    console.log( this instanceof Part );
+  touch(){
+    this._bindEventToDom();
+  }
+
+  _bindEventToDom(){
+    if(this._dom ===null) return ;
+    for( let en in document ){
+      if( en.startsWith("on") && this[en]){
+        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
+      }
+    }
+  }
+
+  get dom(){
+    return this._dom;
+  }
+  get _clientWidth(){
+    if( this._dom != null){
+      this._dom.clientWidth;
+    }
+  }
+  get _clientHeight(){
+    if( this._dom != null){
+      this._dom.clientHeight;
+    }
   }
 }
 
-
-class Zel{
+class Zel extends Part{
   constructor(){
-    this._dom = null;
+    super();
 
     this._lineNum = null;
     this._editArea = null;
 
     this._fontStyle = {
       fontSize : '12px',
-      fontFamily : 'monospace,Hiragino Sans GB,STHeiti,Microsoft Yahei,sans-serif',
+      fontFamily : 'consoles,monospace,Hiragino Sans GB,STHeiti,Microsoft Yahei,sans-serif',
       fontColor : 'white'
     };
 
+    this.touch();
   }
 
   init( dom , file = null){
@@ -93,8 +119,7 @@ class Zel{
 
     if( is.backgroundColor === "" )
       is.backgroundColor = '#9e9e9e';
-    
-    this._bindevent();
+
     this._initLineNumber();
     this._initEditarea();
 
@@ -103,14 +128,6 @@ class Zel{
     }
 
     return this;
-  }
-
-  _bindevent(){
-    for( let en in document ){
-      if( en.startsWith("on") && this[en]){
-        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
-      }
-    }
   }
 
   _initLineNumber(){
@@ -125,21 +142,12 @@ class Zel{
     this._dom.appendChild(this._editArea.dom);
   }
 
-  get _clientWidth(){
-    if( this._dom != null){
-      this._dom.clientWidth;
-    }
-  }
-  get _clientHeight(){
-    if( this._dom != null){
-      this._dom.clientHeight;
-    }
-  }
 }
 
-class ZInputContext{
-
+class ZInputContext extends Part{
   constructor( ){
+    super();
+
     this._dom = document.createElement("input");
     let istyle = this._dom.style;
     //istyle.display = 'none';
@@ -151,24 +159,17 @@ class ZInputContext{
     istyle.backgroundColor = 'rgba(0,0,0,0)';
     istyle.width = '100%';
 
-    this._bindevent();
+    this.touch();
+
+    //@Test
+    this._bindAlle();
   }
 
   focus(){
     this._dom.focus();
   }
 
-
-
-  _bindevent(){
-    for( let en in document ){
-      if( en.startsWith("on") && this[en]){
-        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
-      }
-    }
-    this._bindAlle();
-  }
-
+  //@Test
   _bindAlle(){
     for( let en in document ){
       if( en.startsWith("on") ){
@@ -181,39 +182,28 @@ class ZInputContext{
       }
     }
   }
-
-  get dom(){
-    return this._dom;
-  }
 }
 
-class ZLineNumBar{
+class ZLineNumBar extends Part{
   constructor(){
+    super();
+
     this._dom = support.getEmptyDiv();
-    
     const ls = this._dom.style;
     ls.height = '100%';
     ls.width = '20px';
 
-    ls.borderRight = '1px solid red';
+    ls.borderRight = '1px solid #c1c1c1c2';
     ls.display = 'inline-block';
-  }
 
-  _bindevent(){
-    for( let en in document ){
-      if( en.startsWith("on") && this[en]){
-        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
-      }
-    }
-  }
-
-  get dom(){
-    return this._dom;
+    this.touch();
   }
 }
 
-class ZEditArea{
+class ZEditArea extends Part{
   constructor(){
+    super();
+    
     this._dom = support.getEmptyDiv();
     this._input = null;
 
@@ -224,7 +214,7 @@ class ZEditArea{
     ls.display = 'inline-block';
     ls.position = 'relative';
 
-    this._bindevent();
+    this.touch();
   }
   
   onclick(e){
@@ -236,22 +226,11 @@ class ZEditArea{
       this._input.focus();
     }
   }
-  
-  _bindevent(){
-    for( let en in document ){
-      if( en.startsWith("on") && this[en]){
-        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
-      }
-    }
-  }
 
   set width(w){
     this._dom.style.width = w;
   }
 
-  get dom(){
-    return this._dom;
-  }
 }
 
 class support{
@@ -264,6 +243,4 @@ class support{
 
     return dom;
   }
-
-
 }
