@@ -44,7 +44,7 @@ class Eventable{
   }
 }
 Eventable.PROPERTY = {
-  EVENT_HANDLERS: '[EventHandlers]'
+  EVENT_HANDLERS: '[Zel.Eventable:EventHandlers]'
 }
 
 class Part extends Eventable{
@@ -53,6 +53,7 @@ class Part extends Eventable{
 
     this._dom = null;
     this._parent = null;
+    this._style = null;
 
     this._bindEventToDom();
   }
@@ -75,9 +76,9 @@ class Part extends Eventable{
 
       if(  this[Eventable.PROPERTY.EVENT_HANDLERS][localen] && this[Eventable.PROPERTY.EVENT_HANDLERS][localen].length > 0){
         for( let handler of this[Eventable.PROPERTY.EVENT_HANDLERS][localen]){
-          if( !handler['[ZEL.Part:isTouchToDom]'] ){
+          if( !handler[Part.PROPERTY.ISTOUCHTODOM] ){
             this._dom.addEventListener( localen, handler.bind(this) );
-            handler['[ZEL.Part:isTouchToDom]'] = true;
+            handler[Part.PROPERTY.ISTOUCHTODOM] = true;
           }
         }
       }
@@ -98,7 +99,9 @@ class Part extends Eventable{
     }
   }
 }
-
+Part.PROPERTY={
+  ISTOUCHTODOM:'[Zel.Part:isTouchToDom]'
+}
 class Zel extends Part{
   constructor(){
     super();
@@ -109,8 +112,9 @@ class Zel extends Part{
 
     this._fontStyle = {
       fontSize : '12px',
-      fontFamily : 'consoles,monospace,Hiragino Sans GB,STHeiti,Microsoft Yahei,sans-serif',
-      fontColor : 'white'
+      fontFamily : 'Consolas, "Courier New",monospace,Hiragino Sans GB,STHeiti,Microsoft Yahei,sans-serif',
+      fontColor : 'white',
+      fontWeight: '500'
     };
 
     this.touch();
@@ -128,7 +132,7 @@ class Zel extends Part{
     is.fontFamily = this._fontStyle.fontFamily || 'Microsoft Yahei';
     is.color = this._fontStyle.fontColor || 'black';
     is.fontSize = this._fontStyle.fontSize || '10px';
-
+    is.fontWeight = '500';
 
     if( is.backgroundColor === "" )
       is.backgroundColor = '#9e9e9e';
@@ -153,17 +157,33 @@ class Zel extends Part{
     this._editArea.width = this._dom.clientWidth - this._lineNum._dom.offsetWidth;
 
     this._dom.appendChild(this._editArea.dom);
+    this._editArea._parent = this;
 
-    this._editArea.on('click', function (e){
-      if( this._input === null){
-        this._input = new ZInputContext();
-        this._dom.appendChild(this._input._dom);
-        this._input.focus();
-      }else{
-        this._input.focus();
-      }
-    });
+    this._editArea.on('click', this._editAreaClickEvent);
   }
+
+  _editAreaClickEvent(e){
+    const tmpzel = this._parent;
+    if( tmpzel._input === null){
+      tmpzel._input = new ZInputContext();
+      tmpzel._input.inputStyle = tmpzel._fontStyle;
+      tmpzel._input.width = `${this._dom.clientWidth}px`;
+      tmpzel._input.left = `${tmpzel._lineNum._dom.clientWidth + 1}px`;
+      tmpzel._dom.appendChild(tmpzel._input._dom);
+      tmpzel._input.focus();
+
+      tmpzel._input.on('input',function(e){
+        console.log(e);
+      });
+
+      tmpzel._input.on('keyup',function(e){
+        console.log(e);
+      });
+    }else{
+      tmpzel._input.focus();
+    }
+  }
+
 
 }
 
@@ -190,6 +210,24 @@ class ZInputContext extends Part{
     this._dom.focus();
   }
 
+  set inputStyle({ fontSize, fontColor, fontFamily, fontWeight }){
+    if( this._dom === null ) return ;
+    const ls = this._dom.style;
+    ls.color = fontColor;
+    ls.fontSize = fontSize;
+    ls.fontFamily = fontFamily;
+    ls.fontWeight = fontWeight;
+  }
+
+  set width(w){
+    if( this._dom === null ) return ;
+    this._dom.style.width = w;
+  }
+
+  set left(l){
+    if( this._dom === null ) return ;
+    this._dom.style.left = l;
+  }
 }
 
 class ZLineNumBar extends Part{
@@ -223,18 +261,6 @@ class ZEditArea extends Part{
     ls.position = 'relative';
 
     this.touch();
-  }
-  
-  onclick(e){
-    // if( this._input === null){
-    //   this._input = new ZInputContext();
-    //   this._dom.appendChild(this._input._dom);
-    //   this._input.focus();
-    // }else{
-    //   this._input.focus();
-    // }
-    console.log('123');
-    console.log(this);
   }
 
   set width(w){
