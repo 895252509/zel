@@ -36,7 +36,7 @@ class Eventable{
     while( proto !== Object.prototype){
       for( let type of Object.getOwnPropertyNames(proto) ){
         if( type.startsWith('on') && type !== 'on'){
-          new Eventable() .on.call(this, type.substr(2), this[type] );
+          new Eventable() .on.call(this, type.substr(2), this[type].bind(this) );
         }
       }
       proto = proto.__proto__;
@@ -69,14 +69,17 @@ class Part extends Eventable{
   _bindEventToDom(type){
     if(this._dom ===null) return ;
     for( let en in document ){
-      if(!en.startsWith("on") && !!type && en.substr(2) !== type ) continue;
+      if( !en.startsWith("on") ) continue;
+      let localen = en.substr(2);
+      if( !!type && localen !== type ) continue;
 
-      if(  this[en] ){
-        this._dom.addEventListener( en.substr(2), this[en].bind(this) );
-
-        console.log(this[en].name);
-        console.log(this[en].bind(this).name);
-        console.log(this[en].bind(this).name);
+      if(  this[Eventable.PROPERTY.EVENT_HANDLERS][localen] && this[Eventable.PROPERTY.EVENT_HANDLERS][localen].length > 0){
+        for( let handler of this[Eventable.PROPERTY.EVENT_HANDLERS][localen]){
+          if( !handler['[ZEL.Part:isTouchToDom]'] ){
+            this._dom.addEventListener( localen, handler.bind(this) );
+            handler['[ZEL.Part:isTouchToDom]'] = true;
+          }
+        }
       }
     }
   }
@@ -181,27 +184,12 @@ class ZInputContext extends Part{
 
     this.touch();
 
-    //@Test
-    this._bindAlle();
   }
 
   focus(){
     this._dom.focus();
   }
 
-  //@Test
-  _bindAlle(){
-    for( let en in document ){
-      if( en.startsWith("on") ){
-        this._dom.addEventListener( en.substr(2), function (e){
-          
-          console.log( `type:${e.type},value:${e.type === 'input'?e.data:'null'}` );
-  
-          console.log(e);
-        });
-      }
-    }
-  }
 }
 
 class ZLineNumBar extends Part{

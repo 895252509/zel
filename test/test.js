@@ -1,6 +1,8 @@
 window.addEventListener("load",function (){
   const zel = new Zel() .init("div1");
-  this.document.body.appendChild( new ZEditArea() .dom );
+  const area =  new ZEditArea();
+  this.document.body.appendChild( area.dom );
+
 
   console.log(zel);
 
