@@ -1,5 +1,6 @@
 window.addEventListener("load",function (){
   const zel = new Zel() .init("div1");
+  this.document.body.appendChild( new ZEditArea() .dom );
 
   console.log(zel);
 
@@ -19,5 +20,16 @@ window.addEventListener("load",function (){
 
   });
   
-  
+  function clickhandler(e){
+    console.log(this);
+  }
+
+  this.document.querySelector("#div2").addEventListener('click', clickhandler);
+  this.document.querySelector("#div2").addEventListener('click', clickhandler);
+  this.document.querySelector("#div2").addEventListener('click', function (){
+    console.log(this);
+  });
+  this.document.querySelector("#div2").addEventListener('click', function (){
+    console.log(this);
+  });
 });

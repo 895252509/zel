@@ -1,29 +1,29 @@
 class Eventable{
   constructor(){
-    this[this.PROPERTY.EVENT_HANDLERS] = {};
+    this[Eventable.PROPERTY.EVENT_HANDLERS] = {};
 
     this._bindEvent();
   }
 
   on(type, handler){
-    if( !this[this.PROPERTY.EVENT_HANDLERS][type] ){
-      this[this.PROPERTY.EVENT_HANDLERS][type] = [];
+    if( !this[Eventable.PROPERTY.EVENT_HANDLERS][type] ){
+      this[Eventable.PROPERTY.EVENT_HANDLERS][type] = [];
     }
-    this[this.PROPERTY.EVENT_HANDLERS][type].push(handler);
+    this[Eventable.PROPERTY.EVENT_HANDLERS][type].push(handler);
     return this;
   }
 
   trigger(type, e){
-    if( this[this.PROPERTY.EVENT_HANDLERS][type] &&
-    this[this.PROPERTY.EVENT_HANDLERS][type].length !== 0 ){
-      for( let handler of this[this.PROPERTY.EVENT_HANDLERS][type] ){
+    if( this[Eventable.PROPERTY.EVENT_HANDLERS][type] &&
+    this[Eventable.PROPERTY.EVENT_HANDLERS][type].length !== 0 ){
+      for( let handler of this[Eventable.PROPERTY.EVENT_HANDLERS][type] ){
         handler.call(this, e);
       }
     }
 
-    if( this[this.PROPERTY.EVENT_HANDLERS][`${type}$asyn`] &&
-    this[this.PROPERTY.EVENT_HANDLERS][`${type}$asyn`].length !== 0 ){
-      for( let handler of this[this.PROPERTY.EVENT_HANDLERS][`${type}$asyn`] ){
+    if( this[Eventable.PROPERTY.EVENT_HANDLERS][`${type}$asyn`] &&
+    this[Eventable.PROPERTY.EVENT_HANDLERS][`${type}$asyn`].length !== 0 ){
+      for( let handler of this[Eventable.PROPERTY.EVENT_HANDLERS][`${type}$asyn`] ){
         window.setTimeout(()=>{
           handler.call(this, e);
         })
@@ -36,18 +36,15 @@ class Eventable{
     while( proto !== Object.prototype){
       for( let type of Object.getOwnPropertyNames(proto) ){
         if( type.startsWith('on') && type !== 'on'){
-          this.on( type.substr(2), this[type].bind(this) );
+          new Eventable() .on.call(this, type.substr(2), this[type] );
         }
       }
       proto = proto.__proto__;
     }
   }
-
-  get PROPERTY(){
-    return {
-      EVENT_HANDLERS: '[EventHandlers]'
-    }
-  }
+}
+Eventable.PROPERTY = {
+  EVENT_HANDLERS: '[EventHandlers]'
 }
 
 class Part extends Eventable{
@@ -55,19 +52,31 @@ class Part extends Eventable{
     super();
 
     this._dom = null;
+    this._parent = null;
 
     this._bindEventToDom();
   }
 
-  touch(){
-    this._bindEventToDom();
+  on(type, handler){
+    super.on(type, handler);
+    this.touch(type);
   }
 
-  _bindEventToDom(){
+  touch(type){
+    this._bindEventToDom(type);
+  }
+
+  _bindEventToDom(type){
     if(this._dom ===null) return ;
     for( let en in document ){
-      if( en.startsWith("on") && this[en]){
+      if(!en.startsWith("on") && !!type && en.substr(2) !== type ) continue;
+
+      if(  this[en] ){
         this._dom.addEventListener( en.substr(2), this[en].bind(this) );
+
+        console.log(this[en].name);
+        console.log(this[en].bind(this).name);
+        console.log(this[en].bind(this).name);
       }
     }
   }
@@ -93,6 +102,7 @@ class Zel extends Part{
 
     this._lineNum = null;
     this._editArea = null;
+    this._input = null;
 
     this._fontStyle = {
       fontSize : '12px',
@@ -126,7 +136,7 @@ class Zel extends Part{
     if( file === null){
 
     }
-
+    this.touch();
     return this;
   }
 
@@ -140,6 +150,16 @@ class Zel extends Part{
     this._editArea.width = this._dom.clientWidth - this._lineNum._dom.offsetWidth;
 
     this._dom.appendChild(this._editArea.dom);
+
+    this._editArea.on('click', function (e){
+      if( this._input === null){
+        this._input = new ZInputContext();
+        this._dom.appendChild(this._input._dom);
+        this._input.focus();
+      }else{
+        this._input.focus();
+      }
+    });
   }
 
 }
@@ -218,13 +238,15 @@ class ZEditArea extends Part{
   }
   
   onclick(e){
-    if( this._input === null){
-      this._input = new ZInputContext();
-      this._dom.appendChild(this._input._dom);
-      this._input.focus();
-    }else{
-      this._input.focus();
-    }
+    // if( this._input === null){
+    //   this._input = new ZInputContext();
+    //   this._dom.appendChild(this._input._dom);
+    //   this._input.focus();
+    // }else{
+    //   this._input.focus();
+    // }
+    console.log('123');
+    console.log(this);
   }
 
   set width(w){
