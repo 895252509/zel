@@ -2,7 +2,12 @@ window.addEventListener("load",function (){
   const zel = new Zel() .init("div1");
   const area =  new ZEditArea();
   this.document.body.appendChild( area.dom );
-
+  document.body.addEventListener('click',function (e){
+    console.log(`body click=x:${e.clientX},y:${e.clientY}`);
+  })
+  area.on('click',function(e){
+    console.log(`area click=x:${e.clientX},y:${e.clientY}`);
+  })
 
   console.log(zel);
 
@@ -16,22 +21,10 @@ window.addEventListener("load",function (){
         var str = {};
         read.readLine( str , 10 );
       }
-
+      
       console.log(str);
     }
 
   });
   
-  function clickhandler(e){
-    console.log(this);
-  }
-
-  this.document.querySelector("#div2").addEventListener('click', clickhandler);
-  this.document.querySelector("#div2").addEventListener('click', clickhandler);
-  this.document.querySelector("#div2").addEventListener('click', function (){
-    console.log(this);
-  });
-  this.document.querySelector("#div2").addEventListener('click', function (){
-    console.log(this);
-  });
 });

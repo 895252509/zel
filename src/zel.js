@@ -54,13 +54,29 @@ class Part extends Eventable{
     this._dom = null;
     this._parent = null;
     this._style = null;
+    this._children = [];
 
     this._bindEventToDom();
+  }
+
+  appendChild(part){
+    if( part instanceof Part ){
+      this._children.push(part);
+      part._parent = this;
+      if( this._dom !== null && part._dom !== null ){
+        this._dom.appendChild(part._dom);
+      }
+    }
   }
 
   on(type, handler){
     super.on(type, handler);
     this.touch(type);
+  }
+
+  trigger(etype, e){
+    super.trigger(etype, e);
+
   }
 
   touch(type){
@@ -102,6 +118,8 @@ class Part extends Eventable{
 Part.PROPERTY={
   ISTOUCHTODOM:'[Zel.Part:isTouchToDom]'
 }
+Part.EventTypes = Object.getOwnPropertyNames(HTMLElement.prototype).filter(en => en.startsWith('on'));
+
 class Zel extends Part{
   constructor(){
     super();
@@ -147,27 +165,32 @@ class Zel extends Part{
     return this;
   }
 
+  onkeydown(e){
+    console.log(e);
+  }
+
   _initLineNumber(){
     this._lineNum = new ZLineNumBar();
-    this._dom.appendChild(this._lineNum.dom);
+    this.appendChild(this._lineNum);
   }
 
   _initEditarea(){
     this._editArea = new ZEditArea();
+    this.appendChild(this._editArea);
+
     this._editArea.width = this._dom.clientWidth - this._lineNum._dom.offsetWidth;
-
-    this._dom.appendChild(this._editArea.dom);
-    this._editArea._parent = this;
-
-    this._editArea.on('click', this._editAreaClickEvent);
+    this._editArea.on('click', function (e){
+      this._parent.trigger('editAreaClick', e);
+    });
   }
 
-  _editAreaClickEvent(e){
-    const tmpzel = this._parent;
+  oneditAreaClick(e){
+    const tmpzel = this;
     if( tmpzel._input === null){
       tmpzel._input = new ZInputContext();
       tmpzel._input.inputStyle = tmpzel._fontStyle;
-      tmpzel._input.width = `${this._dom.clientWidth}px`;
+      // tmpzel._input.width = `${tmpzel._editArea._dom.clientWidth}px`;
+      tmpzel._input.width = '1px';
       tmpzel._input.left = `${tmpzel._lineNum._dom.clientWidth + 1}px`;
       tmpzel._dom.appendChild(tmpzel._input._dom);
       tmpzel._input.focus();
@@ -183,7 +206,6 @@ class Zel extends Part{
       tmpzel._input.focus();
     }
   }
-
 
 }
 
