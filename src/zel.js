@@ -127,12 +127,16 @@ class Zel extends Part{
     this._lineNum = null;
     this._editArea = null;
     this._input = null;
+    this._data = null;
+    this._fontSize = 12;
+    this._doc = [];
 
     this._fontStyle = {
-      fontSize : '12px',
+      fontSize : `${this._fontSize}px`,
       fontFamily : 'Consolas, "Courier New",monospace,Hiragino Sans GB,STHeiti,Microsoft Yahei,sans-serif',
       fontColor : 'white',
-      fontWeight: '500'
+      fontWeight: '500',
+      lineHeight: `${this._fontSize + 4}px`
     };
 
     this.touch();
@@ -167,11 +171,31 @@ class Zel extends Part{
 
   onkeydown(e){
     console.log(e);
+    switch (e.code) {
+      case 'Enter':
+        this._doc.push('\r\n');
+        break;
+      default:
+        break;
+    }
+    
+  }
+
+  oninput(e){
+    console.log(e);
+    if( e.inputtype === 'insertCompositionText' && e.data && !e.data.match(/[\u4e00-\u9fa5]+|[\u0370-\u03ff]+/)) {
+      return ;
+    }
+
+    
+
+
   }
 
   _initLineNumber(){
     this._lineNum = new ZLineNumBar();
     this.appendChild(this._lineNum);
+    this._lineNum.trigger('load');
   }
 
   _initEditarea(){
@@ -190,18 +214,11 @@ class Zel extends Part{
       tmpzel._input = new ZInputContext();
       tmpzel._input.inputStyle = tmpzel._fontStyle;
       // tmpzel._input.width = `${tmpzel._editArea._dom.clientWidth}px`;
-      tmpzel._input.width = '1px';
+      tmpzel._input.width = '100%';
       tmpzel._input.left = `${tmpzel._lineNum._dom.clientWidth + 1}px`;
       tmpzel._dom.appendChild(tmpzel._input._dom);
       tmpzel._input.focus();
 
-      tmpzel._input.on('input',function(e){
-        console.log(e);
-      });
-
-      tmpzel._input.on('keyup',function(e){
-        console.log(e);
-      });
     }else{
       tmpzel._input.focus();
     }
@@ -256,15 +273,39 @@ class ZLineNumBar extends Part{
   constructor(){
     super();
 
+    this._lineCount = 2;
+
     this._dom = support.getEmptyDiv();
     const ls = this._dom.style;
     ls.height = '100%';
-    ls.width = '20px';
-
-    ls.borderRight = '1px solid #c1c1c1c2';
+    ls.width = '40px';
+    //ls.borderRight = '1px solid #c1c1c1c2';
     ls.display = 'inline-block';
+    ls.backgroundColor = 'rgba(0, 0, 0, 0.13)';
 
     this.touch();
+  }
+
+  onload(){
+    for( let i = 0; i< this._lineCount ; i++ ){
+      this.addline(i);
+    }
+  }
+
+  addline(num){
+    const linedom = support.getEmptyDiv();
+    linedom.innerHTML = `<span>${num}</span>`;
+    const ls = linedom.style;
+    //ls.display = 'inline-block';
+    ls.width = '100%';
+    ls.cssFloat = 'left';
+    ls.textAlign = 'center';
+    ls.height = this._parent._fontStyle.lineHeight || '16px';
+    this.dom.appendChild(linedom);
+  }
+
+  get lineCount(){
+    return this._lineCount;
   }
 }
 
