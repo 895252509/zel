@@ -1,28 +1,27 @@
+class ZInputStream {
 
-class ZInputStream{
+  constructor() {}
 
-  constructor(){ }
-  
-  close(){ }
-  
-  read(){ }
-  
-  skip(){ }
+  close() {}
 
-  ready(){ }
+  read() {}
 
-  get LINEBREAK_CODE_RN(){
+  skip() {}
+
+  ready() {}
+
+  get LINEBREAK_CODE_RN() {
     return '\r\n';
   }
 
-  get LINEBREAK_CODE_N(){
+  get LINEBREAK_CODE_N() {
     return '\n';
   }
 }
 
-class ZFileInputStream extends ZInputStream{
+class ZFileInputStream extends ZInputStream {
 
-  constructor( file = null ){
+  constructor(file = null) {
     super();
 
     this._file = file || null;
@@ -36,76 +35,75 @@ class ZFileInputStream extends ZInputStream{
     this._read();
   }
 
-  read( str , len = 0){
-    if( str == null  ) return;
-    if( typeof str.value === "undefined" ) str.value = "";
-    while( this._pt < ( (len != 0 && len <this.length)? len : this.length) ){
-      str.value = str.value.concat(this._buffer.substr(this._pt,1));
+  read(str, len = 0) {
+    if (str == null) return;
+    if (typeof str.value === "undefined") str.value = "";
+    while (this._pt < ((len != 0 && len < this.length) ? len : this.length)) {
+      str.value = str.value.concat(this._buffer.substr(this._pt, 1));
       this._pt++;
     }
   }
 
-  readLine( str ){
-    if( str == null  ) return;
-    if( typeof str.value === "undefined" ) str.value = "";
-    while( this._pt < this.length ){
-      let chr = this._buffer.substr(this._pt,1);
+  readLine(str) {
+    if (str == null) return;
+    if (typeof str.value === "undefined") str.value = "";
+    while (this._pt < this.length) {
+      let chr = this._buffer.substr(this._pt, 1);
       str.value = str.value.concat(chr);
       this._pt++;
 
-      if( chr === this.LINEBREAK_CODE_RN || chr === this.LINEBREAK_CODE_N )
+      if (chr === this.LINEBREAK_CODE_RN || chr === this.LINEBREAK_CODE_N)
         break;
     }
   }
 
-  close(){
+  close() {
     this._ready = false;
     this._file = null;
   }
 
-  _read(){
-    if( this._file == null ) {
+  _read() {
+    if (this._file == null) {
       this._read = false;
-      return ;
+      return;
     }
     let reader = new FileReader();
     reader.readAsText(this._file);
-    reader.onloadend = (function (e){
+    reader.onloadend = (function(e) {
       this._buffer = new String(reader.result);
       this._ready = true;
 
-      if( this["onloadend"] )
+      if (this["onloadend"])
         this["onloadend"].call(this);
     }).bind(this);
   }
 
-  get length(){
+  get length() {
     return this._file && this._file.size;
   }
 
-  get name(){
+  get name() {
     return this._file && this._file.name;
   }
 
-  get type(){
+  get type() {
     return this._file && this._file.type;
   }
 }
 
-class ZReader{
-  constructor(){ }
+class ZReader {
+  constructor() {}
 
-  close(){ }
+  close() {}
 
-  mark(){ }
+  mark() {}
 
-  read(){ }
+  read() {}
 
-  close(){ }
+  close() {}
 
-  reset(){ }
+  reset() {}
 
-  skip(){ }
+  skip() {}
 
 }
-
